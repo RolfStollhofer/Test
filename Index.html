@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech-to-Text Test</title>
+</head>
+<body>
+    <h1>Speech-to-Text Test</h1>
+    <button id="start">🎙️ Aufnahme starten</button>
+    <button id="stop" disabled>🛑 Aufnahme stoppen</button>
+    <textarea id="output" rows="10" cols="50" placeholder="Gesprochener Text erscheint hier..."></textarea>
+
+    <script>
+        const startButton = document.getElementById('start');
+        const stopButton = document.getElementById('stop');
+        const output = document.getElementById('output');
+
+        let recognition;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'de-DE';
+            recognition.interimResults = true;
+            recognition.continuous = true;
+
+            recognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                output.value = transcript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Fehler bei der Spracherkennung:', event.error);
+                alert('Fehler: ' + event.error);
+            };
+
+            recognition.onend = () => {
+                console.log('Spracherkennung gestoppt.');
+                stopButton.disabled = true;
+                startButton.disabled = false;
+            };
+        } else {
+            alert('Ihr Browser unterstützt die Web Speech API leider nicht.');
+        }
+
+        startButton.addEventListener('click', () => {
+            if (recognition) {
+                recognition.start();
+                startButton.disabled = true;
+                stopButton.disabled = false;
+            }
+        });
+
+        stopButton.addEventListener('click', () => {
+            if (recognition) {
+                recognition.stop();
+                stopButton.disabled = true;
+                startButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
